@@ -20,15 +20,18 @@ inpData = xlsx
 
 % define constants necessary for thermal model
 
+Cp = %specific heat of air (J/kg/K)
+rho = %density of air (kg/m^3)
+ventRate = %ventilation rate (m^3/s)
+Tset = %inside temperature (C)
+Tout = %outside temperature (C)
+
 % function for finding heat loss for ventilation
 % inputs: specific heat of air, density of air
           % venitlation rate, temperature inside/outside
-% output: energy consumption in W
-
-function energyNeeded = ventHeat(% inputs)
-    % define constants in equation
-    % do math
-    energyNeeded = % energy consumption
+% output: energy loss in Joules 
+function ventEnergy = ventE(Cp, rho, ventRate, Tset, Tout)
+    ventEnergy = Cp*rho*ventRate*(Tset - Tout); % energy consumption
 end
 
 % function for converting Joules to kWh
