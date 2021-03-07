@@ -20,14 +20,19 @@ inpData = xlsx
 
 % define constants necessary for thermal model
 
+rSideInsu = %R-value of wall insulation (m^2*K/W)
+sideMetalCond = %thermal conductivity of metal siding material (W/m/K)
+sideMetalThick = %thickness of metal siding (m)
+aSide = %area of wall minus area of windows (m^2)
+
 Cp = %specific heat of air (J/kg/K)
 ventRate = %ventilation rate (m^3/s)
 Tset = %inside temperature (C)
 Tout = %outside temperature (C)
-Tearth = %temperature of ground (C)
 
-floorThick = %floor thickness (m)
-floorCond = %thermal conductivity of flooring matieral (W/m/K)
+pFloor = %perimeter of flooring (m)
+fFloor = %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
+
 long = %total poultry house length (m)
 wide = %total poultry house width (m)
 
@@ -39,41 +44,49 @@ aRoof = %area of roof (m^2)
 sensiDay = %Senisible heat output of birds during lit hours (W/kg)
 sensiNight = %sensible heat output of birds during dark hours (W/kg)
 chickWeight = %weight of chickens (kg)
-litTime = %number of hours house is lit for
 lightOn = %time in hours that house lights are turned on
 lightOff = %time in hours that house lights are turned off
 
 
 %below is basic calculations to do that are used in functions but remain
 %constant, no matter the time
+rSideMetal = sideMetalThick/sideMetalCond;
+uSide = 1/(rSideInsu+rSideMetal);
 
-rFloor = floorThick/floorCond; %Calculates R-value of given floor (m^2*K/W)
-uFloor = 1/rFloor; %Overall heat transfer coefficient (W/m^2/K)
-aFloor = wide*long; %Calculates area of floor (m^2)
+fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
+%1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
 
+%function for finding heat loss through walls
+%inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
+%output: energy loss in Watts
+function wallEnergy = wallE(uSide, aSide, Tset, Tout)
+    wallEnergy = uSide*aSide*(Tset-Tout); %energy loss through walls
+end
+
 % function for finding heat loss for ventilation
 % inputs: specific heat of air, density of air
           % venitlation rate, temperature inside/outside
-% output: energy loss in Joules 
+% output: energy loss in Watts
 function ventEnergy = ventE(Cp, ventRate, Tset, Tout)
     ventEnergy = Cp*densCalc(Tset)*ventRate*(Tset - Tout); % energy loss to ventilation
 end
 
 %function for finding energy loss through floor
-%inputs: overall heat transfer coefficient of floor, area of floor, temperature inside, 
-        %temperature of ground
-%outputs: energy loss in Joules
- function floorEnergy = floorE(uFloor, aFloor, Tset, Tearth)
-    floorEnergy = aFloor*uFloor*(Tset-Tearth); %energy loss through floor
+%inputs: perimeter of floor (m), F value of floor (W/m/F), temperature inside (C), temperature outside (C)
+%outputs: energy loss in Watts
+ function floorEnergy = floorE(pFloor, fFloor, Tset, Tearth)
+    tempDiff = Tset-Tout; %caluclates difference in temperature
+    tempDiff = tempToFahr(tempDiff); %converts difference to deg Farhenheit
+    floorEnergy = pFloor*fFloor*(tempDiff); %energy loss through floor
  end
 
  %function for finding energy loss through roof
  %inputs: overall heat transfer coefficient of room, roof area, temperature
         %inside, temperature outside
- %outputs: energy loss in Joules
+ %outputs: energy loss in Watts
  function roofEnergy = roofE(uRoof, aRoof, Tset, Tout)
     roofEnergy = uRoof*aRoof*(Tset - Tout); %energy loss through roof
  end
@@ -81,13 +94,12 @@ end
 %function for finding heat production from chickens
 %inputs: current time, sensible heat production of birds during day, 
         %during night, weight of birds, time lights on, time lights off
-%outputs: energy production in Joules
-function chickEnergy = chickE(time, sensiDay, sensiNight, chickWeight, litTime, lightOn, lightOff)
-    litTime = litTime*60*60; %Converts litTime from Hours to Seconds
+%outputs: energy production in Watts
+function chickEnergy = chickE(time, sensiDay, sensiNight, chickWeight, lightOn, lightOff)
     if ((time >= lightOn) && (time < lightOff))
-        chickEnergy = sensiDay*chickWeight*litTime; %during lit hours, use senisble heat production for daytime, outputs in J
+        chickEnergy = sensiDay*chickWeight; %during lit hours, use senisble heat production for daytime
     else 
-        chickEnergy = sensiNight*chickWeight*litTime; %during dark hours, use sensible heat production for night, outputs in J
+        chickEnergy = sensiNight*chickWeight; %during dark hours, use sensible heat production for night
     end 
 end
 
@@ -100,6 +112,14 @@ function dens = densCalc(T)
     P = 101325; %Absolute Pressure (Pa)
     dens = P/(R*T); %Performs Calculation of Density of Air (kg/m^3)
 end
+
+%function to convert from deg Celcius to deg Fahrenheit
+%inputs: temperature (C)
+%outputs: temperature (F)
+function tempF = tempToFahr(tempC)
+    tempF = tempC*9/5+32;
+end
+
 
 % function for converting Joules to kWh
 function kWH = convKWH(inp)
