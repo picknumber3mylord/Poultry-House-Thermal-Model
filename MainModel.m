@@ -19,7 +19,7 @@ inpData2019 = csvread('Thermal_Model_Input_Data_2019.csv', 4, 5);
 inpData2018 = csvread('Thermal_Model_Input_Data_2018.csv', 4, 5);
 inpData2017 = csvread('Thermal_Model_Input_Data_2017.csv', 4, 5);
 inpData2016 = csvread('Thermal_Model_Input_Data_2016.csv', 4, 5);
-designData = xlsread(
+designData = xlsread('Mk1.xlsx');
 % organize input data into matrix
 
 % tData = inpData(%indexing)  % vector of time values % might be unneeded
@@ -52,30 +52,28 @@ SZA2016 = inpData2016(:,9)';
 % define constants necessary for thermal model
 
 
-%rSideInsu = %R-value of wall insulation (m^2*K/W)
-%sideMetalCond = %thermal conductivity of metal siding material (W/m/K)
-%sideMetalThick = %thickness of metal siding (m)
-%aSide = %area of wall minus area of windows (m^2)
+rSideInsu = designData(3,1);  %R-value of wall insulation (m^2*K/W)
+sideMetalCond = designData(1,1);  %thermal conductivity of metal siding material (W/m/K)
+sideMetalThick = designData(5,3);  %thickness of metal siding (m)
+aSide =  designData(5,4);  %area of wall minus area of windows (m^2)
 
 %Cp = %specific heat of air (J/kg/K)
-%ventRate = %ventilation rate (m^3/s)
+ventRate = designData(8,1);  %ventilation rate (m^3/s)
 %Tset = %inside temperature (C)
-%Tout = %outside temperature (C)
-=======
-%CpAir = 1000 (J/kg/K);
-%rhoAir = 1.225 (kg/m^3);
-%ventRate = inpData(%indexing);  % ventilation rate (m^3/s)
+Tout = [tempData2016; tempData2017; tempData2018; tempData2019];  %outside temperature (C)
+
+CpAir = 1000  % specific heat of air in (J/kg/K);
+rhoAir = 1.225  % density of air in (kg/m^3);
+ventRate = designData(8,1);  % ventilation rate (m^3/s)
 
 % Don't think this will be needed
 % main loop will give inputs from tempData 
-% Tset = % inside temperature (C)
-% Tout = % outside temperature (C)
 
 % looping through NSRDB data points
-%energyCost2019 = 0;
-%energyCost2018 = 0;
-%energyCost2017 = 0;
-%energyCost2016 = 0;
+energyCost2019 = 0;
+energyCost2018 = 0;
+energyCost2017 = 0;
+energyCost2016 = 0;
 %for i = 1:length(tData)
     % do calcs
     %energyCost += ventE(CpAir, rhoAir, ventRate, Tset, tempData(%indexing))
@@ -85,22 +83,22 @@ SZA2016 = inpData2016(:,9)';
 
 
 
-pFloor = %perimeter of flooring (m)
-fFloor = %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
+pFloor = designData(5,5); % perimeter of flooring (m)
+%fFloor = %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
 
-long = %total poultry house length (m)
-wide = %total poultry house width (m)
+long = designData(5,1);  %total poultry house length (m)
+wide = designData(5,2);  %total poultry house width (m)
 
 rRoofInsu = %R-value of roof insulation (m^2*K/W)
 roofMetalCond = %thermal conductivity of metal roofing material (W/m/K)
 roofMetalThick = %thickness of metal roofing (m)
 aRoof = %area of roof (m^2)
 
-sensiDay = 4.1;  %Senisible heat output of birds during lit hours (W/kg)
-sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
-chickWeight = 1.713; %weight of chickens (kg)
-lightOn = 4; % SUBJECT TO CHANGE %time in hours that house lights are turned on
-lightOff = lightOn + 16; %SUBJECT TO CHANGE %time in hours that house lights are turned off
+sensiDay = %Senisible heat output of birds during lit hours (W/kg)
+sensiNight = %sensible heat output of birds during dark hours (W/kg)
+chickWeight = %weight of chickens (kg)
+lightOn = %time in hours that house lights are turned on
+lightOff = %time in hours that house lights are turned off
 
 
 %below is basic calculations to do that are used in functions but remain
