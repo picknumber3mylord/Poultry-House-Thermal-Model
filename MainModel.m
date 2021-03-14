@@ -94,11 +94,11 @@ roofMetalCond = sideMetalCond; %thermal conductivity of metal roofing material (
 roofMetalThick = sideMetalThick; %thickness of metal roofing (m)
 aRoof = designData(5,6);%area of roof (m^2)
 
-sensiDay = %Senisible heat output of birds during lit hours (W/kg)
-sensiNight = %sensible heat output of birds during dark hours (W/kg)
-chickWeight = %weight of chickens (kg)
-lightOn = %time in hours that house lights are turned on
-lightOff = %time in hours that house lights are turned off
+sensiDay = 4.1; %Senisible heat output of birds during lit hours (W/kg)
+sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
+chickWeight = 1.713; %weight of chickens (kg)
+lightOn = 4; %time in hours that house lights are turned on
+lightOff = lightOn + 16; %time in hours that house lights are turned off
 
 
 %below is basic calculations to do that are used in functions but remain
