@@ -15,39 +15,39 @@ clear all
     % poultry house geometry    
 
 % input reading
-inpData2019 = csvread('Thermal_Model_Input_Data_2019.csv', 4, 5);
-inpData2018 = csvread('Thermal_Model_Input_Data_2018.csv', 4, 5);
-inpData2017 = csvread('Thermal_Model_Input_Data_2017.csv', 4, 5);
-inpData2016 = csvread('Thermal_Model_Input_Data_2016.csv', 4, 5);
+inpData2019 = readtable('Thermal_Model_Input_Data_2019.csv','PreserveVariableNames',true);
+inpData2018 = readtable('Thermal_Model_Input_Data_2018.csv','PreserveVariableNames',true);
+inpData2017 = readtable('Thermal_Model_Input_Data_2017.csv','PreserveVariableNames',true);
+inpData2016 = readtable('Thermal_Model_Input_Data_2016.csv','PreserveVariableNames',true);
 designData = xlsread('Mk1.xlsx');
 % organize input data into matrix
 
 % tData = inpData(%indexing)  % vector of time values % might be unneeded
-tempData2019 = inpData2019(:,16)';   % vectors of hourly temperature data from NSRDB
-tempData2018 = inpData2018(:,16)';
-tempData2017 = inpData2017(:,16)';
-tempData2016 = inpData2016(:,16)';
+tempData2019 = table2array(inpData2019(4:end,21))';   % vectors of hourly temperature data from NSRDB
+tempData2018 = table2array(inpData2018(4:end,21))';
+tempData2017 = table2array(inpData2017(4:end,21))';
+tempData2016 = table2array(inpData2016(4:end,21))';
 
 % solar radiation data from NSRDB
-DHI2019 = inpData2019(:,1)';    
-DHI2018 = inpData2018(:,1)';
-DHI2017 = inpData2017(:,1)';
-DHI2016 = inpData2016(:,1)';
+DHI2019 = table2array(inpData2019(4:end,6))';    
+DHI2018 = table2array(inpData2018(4:end,6))';
+DHI2017 = table2array(inpData2017(4:end,6))';
+DHI2016 = table2array(inpData2016(4:end,6))';
 
-DNI2019 = inpData2019(:,2)';
-DNI2018 = inpData2018(:,2)';
-DNI2017 = inpData2017(:,2)';
-DNI2016 = inpData2016(:,2)';
+DNI2019 = table2array(inpData2019(4:end,7))';
+DNI2018 = table2array(inpData2018(4:end,7))';
+DNI2017 = table2array(inpData2017(4:end,7))';
+DNI2016 = table2array(inpData2016(4:end,7))';
 
-GHI2019 = inpData2019(:,3)';
-GHI2018 = inpData2018(:,3)';
-GHI2017 = inpData2017(:,3)';
-GHI2016 = inpData2016(:,3)';
+GHI2019 = table2array(inpData2019(4:end,8))';
+GHI2018 = table2array(inpData2018(4:end,8))';
+GHI2017 = table2array(inpData2017(4:end,8))';
+GHI2016 = table2array(inpData2016(4:end,8))';
 
-SZA2019 = inpData2019(:,9)';
-SZA2018 = inpData2018(:,9)';
-SZA2017 = inpData2017(:,9)';
-SZA2016 = inpData2016(:,9)';
+SZA2019 = table2array(inpData2019(4:end,14))';
+SZA2018 = table2array(inpData2018(4:end,14))';
+SZA2017 = table2array(inpData2017(4:end,14))';
+SZA2016 = table2array(inpData2016(4:end,14))';
 
 % define constants necessary for thermal model
 
@@ -57,34 +57,20 @@ sideMetalCond = designData(1,1);  %thermal conductivity of metal siding material
 sideMetalThick = designData(5,3);  %thickness of metal siding (m)
 aSide =  designData(5,4);  %area of wall minus area of windows (m^2)
 
-%Cp = %specific heat of air (J/kg/K)
+Cp = 1005; %specific heat of air (J/kg/K)
 ventRate = designData(8,1);  %ventilation rate (m^3/s)
-%Tset = %inside temperature (C)
+Tset = 70; %inside temperature (C)
 Tout = [tempData2016; tempData2017; tempData2018; tempData2019];  %outside temperature (C)
 
-CpAir = 1000  % specific heat of air in (J/kg/K);
-rhoAir = 1.225  % density of air in (kg/m^3);
+CpAir = 1000;  % specific heat of air in (J/kg/K);
+rhoAir = 1.225;  % density of air in (kg/m^3);
 ventRate = designData(8,1);  % ventilation rate (m^3/s)
 
 % Don't think this will be needed
 % main loop will give inputs from tempData 
 
-% looping through NSRDB data points
-energyCost2019 = 0;
-energyCost2018 = 0;
-energyCost2017 = 0;
-energyCost2016 = 0;
-%for i = 1:length(tData)
-    % do calcs
-    %energyCost += ventE(CpAir, rhoAir, ventRate, Tset, tempData(%indexing))
-    %energyCost += everything else
-%end
-
-
-
-
 pFloor = designData(5,5); % perimeter of flooring (m)
-%fFloor = %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
+fFloor = 0.2; %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
 
 long = designData(5,1);  %total poultry house length (m)
 wide = designData(5,2);  %total poultry house width (m)
@@ -106,11 +92,46 @@ lightOff = lightOn + 16; %time in hours that house lights are turned off
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
 
-fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
+% fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
 %1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
+
+% looping through NSRDB data points
+energyCost2019 = 0;
+energyCost2018 = 0;
+energyCost2017 = 0;
+energyCost2016 = 0;
+tData = [0:length(tempData2019)-1] / 24;
+for i = 1:length(tData)
+    % do calcs
+    energyCost2016 = energyCost2016 + wallE(uSide, aSide, Tset, Tout(1,i)) 
+                    + ventE(CpAir, ventRate, Tset, Tout(1,i))
+                    + floorE(pFloor, fFloor, Tset, Tout(1,i))
+                    + roofE(uRoof, aRoof, Tset, Tout(1,i))
+                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+                    
+    energyCost2017 = energyCost2017 + wallE(uSide, aSide, Tset, Tout(2,i)) 
+                    + ventE(CpAir, ventRate, Tset, Tout(2,i))
+                    + floorE(pFloor, fFloor, Tset, Tout(2,i))
+                    + roofE(uRoof, aRoof, Tset, Tout(2,i))
+                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+                    
+    energyCost2018 = energyCost2018 + wallE(uSide, aSide, Tset, Tout(3,i)) 
+                    + ventE(CpAir, ventRate, Tset, Tout(3,i))
+                    + floorE(pFloor, fFloor, Tset, Tout(3,i))
+                    + roofE(uRoof, aRoof, Tset, Tout(3,i))
+                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+                    
+    energyCost2019 = energyCost2019 + wallE(uSide, aSide, Tset, Tout(4,i)) 
+                    + ventE(CpAir, ventRate, Tset, Tout(4,i))
+                    + floorE(pFloor, fFloor, Tset, Tout(4,i))
+                    + roofE(uRoof, aRoof, Tset, Tout(4,i))
+                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+                    
+end
+
 
 %function for finding heat loss through walls
 %inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
@@ -130,7 +151,7 @@ end
 %function for finding energy loss through floor
 %inputs: perimeter of floor (m), F value of floor (W/m/F), temperature inside (C), temperature outside (C)
 %outputs: energy loss in Watts
- function floorEnergy = floorE(pFloor, fFloor, Tset, Tearth)
+ function floorEnergy = floorE(pFloor, fFloor, Tset, Tout)
     tempDiff = Tset-Tout; %caluclates difference in temperature
     tempDiff = tempToFahr(tempDiff); %converts difference to deg Farhenheit
     floorEnergy = pFloor*fFloor*(tempDiff); %energy loss through floor
@@ -148,7 +169,8 @@ end
 %inputs: current time, sensible heat production of birds during day, 
         %during night, weight of birds, time lights on, time lights off
 %outputs: energy production in Watts
-function chickEnergy = chickE(time, sensiDay, sensiNight, chickWeight, lightOn, lightOff)
+function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lightOff)
+    time = mod(t,24);
     if ((time >= lightOn) && (time < lightOff))
         chickEnergy = sensiDay*chickWeight; %during lit hours, use senisble heat production for daytime
     else 
@@ -178,8 +200,3 @@ end
 function kWH = convKWH(inp)
     kWH = inp * 3.6 * 10^6;
 end
-
-
-
-
-
