@@ -99,43 +99,28 @@ rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
 
 % looping through NSRDB data points
-energyCost2019 = 0;
-energyCost2018 = 0;
-energyCost2017 = 0;
-energyCost2016 = 0;
+energyCost2019 = [];
+energyCost2018 = [];
+energyCost2017 = [];
+energyCost2016 = [];
 tData = [0:length(tempData2019)-1] / 24;
 for i = 2:length(tData)
     % do calcs
-    energyCost2016 = energyCost2016 + wallE(uSide, aSide, Tset, Tout(1,i)) 
-                    + ventE(CpAir, ventRate, Tset, Tout(1,i))
-                    + floorE(pFloor, fFloor, Tset, Tout(1,i))
-                    + roofE(uRoof, aRoof, Tset, Tout(1,i))
-                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
                     
-    energyCost2017 = energyCost2017 + wallE(uSide, aSide, Tset, Tout(2,i)) 
-                    + ventE(CpAir, ventRate, Tset, Tout(2,i))
-                    + floorE(pFloor, fFloor, Tset, Tout(2,i))
-                    + roofE(uRoof, aRoof, Tset, Tout(2,i))
-                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
                     
-    energyCost2018 = energyCost2018 + wallE(uSide, aSide, Tset, Tout(3,i)) 
-                    + ventE(CpAir, ventRate, Tset, Tout(3,i))
-                    + floorE(pFloor, fFloor, Tset, Tout(3,i))
-                    + roofE(uRoof, aRoof, Tset, Tout(3,i))
-                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
                     
-    energyCost2019 = energyCost2019 + wallE(uSide, aSide, Tset, Tout(4,i)) 
-                    + ventE(CpAir, ventRate, Tset, Tout(4,i))
-                    + floorE(pFloor, fFloor, Tset, Tout(4,i))
-                    + roofE(uRoof, aRoof, Tset, Tout(4,i))
-                    + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
                     
 end
 
-fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(energyCost2016, length(tData)-1));
-fprintf('The energy usage in 2017 was %d kWh.\n', convKWH(energyCost2017, length(tData)-1));
-fprintf('The energy usage in 2018 was %d kWh.\n', convKWH(energyCost2018, length(tData)-1));
-fprintf('The energy usage in 2019 was %d kWh.\n', convKWH(energyCost2019, length(tData)-1));
+fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(sum(energyCost2016), length(tData)-1));
+fprintf('The energy usage in 2017 was %d kWh.\n', convKWH(sum(energyCost2017), length(tData)-1));
+fprintf('The energy usage in 2018 was %d kWh.\n', convKWH(sum(energyCost2018), length(tData)-1));
+fprintf('The energy usage in 2019 was %d kWh.\n', convKWH(sum(energyCost2019), length(tData)-1));
+
 
 %function for finding heat loss through walls
 %inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
