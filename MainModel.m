@@ -104,7 +104,7 @@ energyCost2018 = 0;
 energyCost2017 = 0;
 energyCost2016 = 0;
 tData = [0:length(tempData2019)-1] / 24;
-for i = 1:length(tData)
+for i = 2:length(tData)
     % do calcs
     energyCost2016 = energyCost2016 + wallE(uSide, aSide, Tset, Tout(1,i)) 
                     + ventE(CpAir, ventRate, Tset, Tout(1,i))
@@ -132,6 +132,10 @@ for i = 1:length(tData)
                     
 end
 
+fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(energyCost2016));
+fprintf('The energy usage in 2017 was %d kWh.\n', convKWH(energyCost2017));
+fprintf('The energy usage in 2018 was %d kWh.\n', convKWH(energyCost2018));
+fprintf('The energy usage in 2019 was %d kWh.\n', convKWH(energyCost2019));
 
 %function for finding heat loss through walls
 %inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
@@ -196,7 +200,7 @@ function tempF = tempToFahr(tempC)
 end
 
 
-% function for converting Joules to kWh
-function kWH = convKWH(inp)
-    kWH = inp * 3.6 * 10^6;
+% function for converting W to kWh
+function kWH = convKWH(inp, t)
+    kWH = (inp / 1000) * t;
 end
