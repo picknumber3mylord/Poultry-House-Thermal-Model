@@ -132,7 +132,7 @@ for i = 2:length(tData)
                     
 end
 
-fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(energyCost2016, len(tData)-1);
+fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(energyCost2016, len(tData)-1));
 fprintf('The energy usage in 2017 was %d kWh.\n', convKWH(energyCost2017, len(tData)-1));
 fprintf('The energy usage in 2018 was %d kWh.\n', convKWH(energyCost2018, len(tData)-1));
 fprintf('The energy usage in 2019 was %d kWh.\n', convKWH(energyCost2019, len(tData)-1));
