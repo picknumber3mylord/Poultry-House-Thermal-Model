@@ -83,6 +83,7 @@ aRoof = designData(5,6);%area of roof (m^2)
 sensiDay = 4.1; %Senisible heat output of birds during lit hours (W/kg)
 sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
 chickWeight = 1.713; %weight of chickens (kg)
+numChicken = 70400; %Number of chickens in the house
 lightOn = 4; %time in hours that house lights are turned on
 lightOff = lightOn + 16; %time in hours that house lights are turned off
 
@@ -106,13 +107,13 @@ energyCost2016 = [];
 tData = [0:length(tempData2019)-1] / 24;
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff);
+    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
 end
 
@@ -158,12 +159,12 @@ end
 %inputs: current time, sensible heat production of birds during day, 
         %during night, weight of birds, time lights on, time lights off
 %outputs: energy production in Watts
-function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lightOff)
+function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken)
     time = mod(t,24);
     if ((time >= lightOn) && (time < lightOff))
-        chickEnergy = sensiDay*chickWeight; %during lit hours, use senisble heat production for daytime
+        chickEnergy = numChicken*sensiDay*chickWeight; %during lit hours, use senisble heat production for daytime
     else 
-        chickEnergy = sensiNight*chickWeight; %during dark hours, use sensible heat production for night
+        chickEnergy = numChicken*sensiNight*chickWeight; %during dark hours, use sensible heat production for night
     end 
 end
 
