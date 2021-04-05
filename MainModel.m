@@ -1,6 +1,6 @@
 % Main Model for NZE Poultry House
 % Nathan Shang, Roxy Wilcox, Fermin Banuelos-Gonzalez
-% Edited 3/1/2021
+% Edited 4/5/2021
 
 clc
 clear all
@@ -57,20 +57,14 @@ sideMetalCond = designData(1,1);  %thermal conductivity of metal siding material
 sideMetalThick = designData(5,3);  %thickness of metal siding (m)
 aSide =  designData(5,4);  %area of wall minus area of windows (m^2)
 
-Cp = 1005; %specific heat of air (J/kg/K)
-ventRate = designData(8,1);  %ventilation rate (m^3/s)
-Tset = 70; %inside temperature (C)
+Tset = 21; %inside temperature (C)
 Tout = [tempData2016; tempData2017; tempData2018; tempData2019];  %outside temperature (C)
 
-CpAir = 1000;  % specific heat of air in (J/kg/K);
-rhoAir = 1.225;  % density of air in (kg/m^3);
-ventRate = designData(8,1);  % ventilation rate (m^3/s)
-
-% Don't think this will be needed
-% main loop will give inputs from tempData 
+CpAir = 1005;  % specific heat of air in (J/kg/K);
+rhoAir = 1.204;  % density of air in (kg/m^3); 
 
 pFloor = designData(5,5); % perimeter of flooring (m)
-fFloor = 0.2; %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
+fFloor = 0.72; %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
 
 long = designData(5,1);  %total poultry house length (m)
 wide = designData(5,2);  %total poultry house width (m)
@@ -83,17 +77,17 @@ aRoof = designData(5,6);%area of roof (m^2)
 sensiDay = 4.1; %Senisible heat output of birds during lit hours (W/kg)
 sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
 chickWeight = 1.713; %weight of chickens (kg)
-numChicken = 70400; %Number of chickens in the house
-lightOn = 4; %time in hours that house lights are turned on
+numChicken = 69376; %Number of chickens in the house
+lightOn = 5; %time in hours that house lights are turned on
 lightOff = lightOn + 16; %time in hours that house lights are turned off
-
 
 %below is basic calculations to do that are used in functions but remain
 %constant, no matter the time
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
+ventRate = 5*numChicken/3600;  % ventilation rate (m^3/s)
 
-% fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
+fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
 %1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
@@ -105,15 +99,16 @@ energyCost2018 = [];
 energyCost2017 = [];
 energyCost2016 = [];
 tData = [0:length(tempData2019)-1] / 24;
+
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
 end
 
@@ -134,16 +129,17 @@ end
 % inputs: specific heat of air, density of air
           % venitlation rate, temperature inside/outside
 % output: energy loss in Watts
-function ventEnergy = ventE(Cp, ventRate, Tset, Tout)
-    ventEnergy = Cp*densCalc(Tset)*ventRate*(Tset - Tout); % energy loss to ventilation
+function ventEnergy = ventE(Cp, rhoAir, ventRate, Tset, Tout)
+    ventEnergy = Cp*rhoAir*ventRate*(Tset - Tout); % energy loss to ventilation
 end
 
 %function for finding energy loss through floor
 %inputs: perimeter of floor (m), F value of floor (W/m/F), temperature inside (C), temperature outside (C)
 %outputs: energy loss in Watts
  function floorEnergy = floorE(pFloor, fFloor, Tset, Tout)
-    tempDiff = Tset-Tout; %caluclates difference in temperature
-    tempDiff = tempToFahr(tempDiff); %converts difference to deg Farhenheit
+    TsetF = tempToFahr(Tset); %converts Tset to deg Farhenheit
+    ToutF = tempToFahr(Tout); %converts Tout to deg Farhenheit
+    tempDiff = TsetF-ToutF; %calculates temperature difference
     floorEnergy = pFloor*fFloor*(tempDiff); %energy loss through floor
  end
 
@@ -166,16 +162,6 @@ function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lig
     else 
         chickEnergy = numChicken*sensiNight*chickWeight; %during dark hours, use sensible heat production for night
     end 
-end
-
-%function to calculate current density of air given T in deg C
-%inputs: Indoor Temperature (C)
-%outputs: density of air
-function dens = densCalc(T)
-    R = 287.05; %Universal Gas Constant (J/kg/K)
-    T = T + 273.15; %Covert Temp to Kelvin
-    P = 101325; %Absolute Pressure (Pa)
-    dens = P/(R*T); %Performs Calculation of Density of Air (kg/m^3)
 end
 
 %function to convert from deg Celcius to deg Fahrenheit
