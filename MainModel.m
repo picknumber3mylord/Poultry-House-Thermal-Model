@@ -23,31 +23,31 @@ designData = xlsread('Mk1.xlsx');
 % organize input data into matrix
 
 % tData = inpData(%indexing)  % vector of time values % might be unneeded
-tempData2019 = table2array(inpData2019(4:end,21))';   % vectors of hourly temperature data from NSRDB
-tempData2018 = table2array(inpData2018(4:end,21))';
-tempData2017 = table2array(inpData2017(4:end,21))';
-tempData2016 = table2array(inpData2016(4:end,21))';
+tempData2019 = table2array(inpData2019(3:end,21))';   % vectors of hourly temperature data from NSRDB
+tempData2018 = table2array(inpData2018(3:end,21))';
+tempData2017 = table2array(inpData2017(3:end,21))';
+tempData2016 = table2array(inpData2016(3:end,21))';
 
 % solar radiation data from NSRDB
-DHI2019 = table2array(inpData2019(4:end,6))';    
-DHI2018 = table2array(inpData2018(4:end,6))';
-DHI2017 = table2array(inpData2017(4:end,6))';
-DHI2016 = table2array(inpData2016(4:end,6))';
+DHI2019 = table2array(inpData2019(3:end,6))';    
+DHI2018 = table2array(inpData2018(3:end,6))';
+DHI2017 = table2array(inpData2017(3:end,6))';
+DHI2016 = table2array(inpData2016(3:end,6))';
 
-DNI2019 = table2array(inpData2019(4:end,7))';
-DNI2018 = table2array(inpData2018(4:end,7))';
-DNI2017 = table2array(inpData2017(4:end,7))';
-DNI2016 = table2array(inpData2016(4:end,7))';
+DNI2019 = table2array(inpData2019(3:end,7))';
+DNI2018 = table2array(inpData2018(3:end,7))';
+DNI2017 = table2array(inpData2017(3:end,7))';
+DNI2016 = table2array(inpData2016(3:end,7))';
 
-GHI2019 = table2array(inpData2019(4:end,8))';
-GHI2018 = table2array(inpData2018(4:end,8))';
-GHI2017 = table2array(inpData2017(4:end,8))';
-GHI2016 = table2array(inpData2016(4:end,8))';
+GHI2019 = table2array(inpData2019(3:end,8))';
+GHI2018 = table2array(inpData2018(3:end,8))';
+GHI2017 = table2array(inpData2017(3:end,8))';
+GHI2016 = table2array(inpData2016(3:end,8))';
 
-SZA2019 = table2array(inpData2019(4:end,14))';
-SZA2018 = table2array(inpData2018(4:end,14))';
-SZA2017 = table2array(inpData2017(4:end,14))';
-SZA2016 = table2array(inpData2016(4:end,14))';
+SZA2019 = table2array(inpData2019(3:end,14))';
+SZA2018 = table2array(inpData2018(3:end,14))';
+SZA2017 = table2array(inpData2017(3:end,14))';
+SZA2016 = table2array(inpData2016(3:end,14))';
 
 % define constants necessary for thermal model
 
@@ -98,25 +98,22 @@ energyCost2019 = [];
 energyCost2018 = [];
 energyCost2017 = [];
 energyCost2016 = [];
-tData = [0:length(tempData2019)-1] / 24;
+tData = [0:length(tempData2019)-1];
 
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i-1) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2016(i) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2017(i-1) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2017(i) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2018(i-1) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2018(i) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
-    energyCost2019(i-1) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
+    energyCost2019(i) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken);
                     
 end
 
-fprintf('The energy usage in 2016 was %d kWh.\n', convKWH(sum(energyCost2016), length(tData)-1));
-fprintf('The energy usage in 2017 was %d kWh.\n', convKWH(sum(energyCost2017), length(tData)-1));
-fprintf('The energy usage in 2018 was %d kWh.\n', convKWH(sum(energyCost2018), length(tData)-1));
-fprintf('The energy usage in 2019 was %d kWh.\n', convKWH(sum(energyCost2019), length(tData)-1));
-
+monthlyUse([energyCost2016; energyCost2017; energyCost2018; energyCost2019]);
+yearlyUse([energyCost2016; energyCost2017; energyCost2018; energyCost2019]);
 
 %function for finding heat loss through walls
 %inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
@@ -171,8 +168,27 @@ function tempF = tempToFahr(tempC)
     tempF = tempC*9/5+32;
 end
 
-
-% function for converting W to kWh
-function kWH = convKWH(inp, t)
-    kWH = (inp / 1000) * t;
+function monthlyUse(enrgCost)
+    enrgCost = enrgCost / 1000; % converted to kWh
+    fprintf('The average energy usage in January was %d kWh.\n', sum(enrgCost(1:end,1:(24*31)), 'all')/4)
+    fprintf('The average energy usage in February was %d kWh.\n', sum(enrgCost(1:end,(24*31+1):(24*59)), 'all')/4)
+    fprintf('The average energy usage in March was %d kWh.\n', sum(enrgCost(1:end,(24*59+1):(24*90)), 'all')/4)
+    fprintf('The average energy usage in April was %d kWh.\n', sum(enrgCost(1:end,(24*90+1):(24*120)), 'all')/4)
+    fprintf('The average energy usage in May was %d kWh.\n', sum(enrgCost(1:end,(24*120+1):(24*151)), 'all')/4)
+    fprintf('The average energy usage in June was %d kWh.\n', sum(enrgCost(1:end,(24*151+1):(24*181)), 'all')/4)
+    fprintf('The average energy usage in July was %d kWh.\n', sum(enrgCost(1:end,(24*181+1):(24*212)), 'all')/4)
+    fprintf('The average energy usage in August was %d kWh.\n', sum(enrgCost(1:end,(24*212+1):(24*243)), 'all')/4)
+    fprintf('The average energy usage in September was %d kWh.\n', sum(enrgCost(1:end,(24*243+1):(24*273)), 'all')/4)
+    fprintf('The average energy usage in October was %d kWh.\n', sum(enrgCost(1:end,(24*273+1):(24*304)), 'all')/4)
+    fprintf('The average energy usage in November was %d kWh.\n', sum(enrgCost(1:end,(24*304+1):(24*334)), 'all')/4)
+    fprintf('The average energy usage in December was %d kWh.\n', sum(enrgCost(1:end,(24*334+1):(24*365)), 'all')/4)
+end
+    
+function yearlyUse(enrgCost)
+    enrgCost = enrgCost / 1000; % convert to kWh
+    perYearUse = sum(enrgCost, 2);
+    fprintf('The energy usage in 2016 was %d kWh.\n', perYearUse(1));
+    fprintf('The energy usage in 2017 was %d kWh.\n', perYearUse(2));
+    fprintf('The energy usage in 2018 was %d kWh.\n', perYearUse(3));
+    fprintf('The energy usage in 2019 was %d kWh.\n', perYearUse(4));
 end
