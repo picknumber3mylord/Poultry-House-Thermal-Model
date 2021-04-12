@@ -94,7 +94,7 @@ manureBeltE = 20.768; %Energy consumped by manure belt (kW*hr/day)
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
 ventRate = 5*numChicken/3600;  % ventilation rate (m^3/s)
-machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs
+machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs/day
 
 fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
 %1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
