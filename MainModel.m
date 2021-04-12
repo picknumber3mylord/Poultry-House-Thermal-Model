@@ -81,11 +81,20 @@ numChicken = 69376; %Number of chickens in the house
 lightOn = 5; %time in hours that house lights are turned on
 lightOff = lightOn + 15; %time in hours that house lights are turned off
 
+%Energy Consumers%
+eggPackerE = 2.5; %Energy consumped by egg packer (kW*hr/day)
+eggBeltE = 237.44; %Energy consumped by egg belt (kW*hr/day)
+eggElevatorE = 3.6; %Energy consumped by egg elevator (kW*hr/day)
+eggWasherE = 175; %Energy consumped by egg washer (kW*hr/day)
+lightsE = 13.399; %Energy consumped by lighting (kW*hr/day)
+manureBeltE = 20.768; %Energy consumped by manure belt (kW*hr/day)
+
 %below is basic calculations to do that are used in functions but remain
 %constant, no matter the time
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
 ventRate = 5*numChicken/3600;  % ventilation rate (m^3/s)
+machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs
 
 fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
 %1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
