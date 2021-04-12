@@ -79,7 +79,7 @@ sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
 chickWeight = 1.713; %weight of chickens (kg)
 numChicken = 69376; %Number of chickens in the house
 lightOn = 5; %time in hours that house lights are turned on
-lightOff = lightOn + 16; %time in hours that house lights are turned off
+lightOff = lightOn + 15; %time in hours that house lights are turned off
 
 %below is basic calculations to do that are used in functions but remain
 %constant, no matter the time
