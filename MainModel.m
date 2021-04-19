@@ -83,7 +83,9 @@ lightOn = 5; %time in hours that house lights are turned on
 lightOff = lightOn + 15; %time in hours that house lights are turned off
 
 ventTilt = 90; %tilt of vents with respect to horizontal in degrees
-latitude = 38.5449; %latitude of Davis, CA in decimal degrees
+longitude = -121.74; %longitude of Davis, CA in decimal degrees
+latitude = 38.53; %latitude of Davis, CA in decimal degrees
+deltaTutc = -7; %Difference between PST and UTC
 GHI = [GHI2016; GHI2017; GHI2018; GHI2019];
 SHGCvent = 0.13; %Solar Heat Gain Coefficient of Louver vents
 aVent = designData(5,7); %area of vents (m^2)
@@ -118,13 +120,13 @@ tData = [0:length(tempData2019)-1];
 
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, ventTilt, latitude, day(i), GHI(1,i), aVent);
+    energyCost2016(i) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc);
                     
-    energyCost2017(i) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, ventTilt, latitude, day(i), GHI(2,i), aVent);
+    energyCost2017(i) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc);
                     
-    energyCost2018(i) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, ventTilt, latitude, day(i), GHI(3,i), aVent);
+    energyCost2018(i) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc);
                     
-    energyCost2019(i) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, ventTilt, latitude, day(i), GHI(4,i), aVent);
+    energyCost2019(i) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc);
                     
 end
 
@@ -180,18 +182,29 @@ end
 %function for calculating solar radiation energy gain 
 %inputs: SHGC, tilt of surface, latitude, day of year, GHI, area of surface
 %outputs: Energy gain in Watts
-function solarEnergy = solarE(SHGC, tilt, latitude, day, GHI, area)
-    solarR = solarRad(tilt, latitude, day, GHI); %total solar radiation in W/m^2
-    solarEnergy = SHGC*solarR*area; %energy gain from solar radiation in W
+function solarEnergy = solarE(SHGC, area, tilt, longitude, latitude, day, t, GHI, deltaTutc)
+    solarR = solarRad(tilt, longitude, latitude, day, t, GHI, deltaTutc); %total solar radiation in W/m^2
+    solarEnergySouth = SHGC*solarR(2)*area/2; %energy gain on South roof from solar radiation in W
+    solarEnergyNorth = SHGC*solarR(1)*area/2; %energy gain on North roof from solar radiation in W
+    solarEnergy = solarEnergySouth + solarEnergyNorth;
 end
 
 %function for calculating solar radiation incident on surface
-%inputs: tilt angle in degrees, latitude, day of year, GHI
+%inputs: tilt angle in degrees, longitude, latitude, day of year, time Matrix, GHI, difference between local time and UTC time
 %outputs: Solar radiation incident on surface in W/m^2
-function solarR = solarRad(tilt, latitude, day, GHI)
-    delta = 23.45*sind((360/365)*(284+day));
-    alpha = 90 - latitude + delta;
-    solarR = (GHI*sind(alpha+tilt))/sind(alpha);
+function solarR = solarRad(tilt, longitude, latitude, day, t, GHI, deltaTutc)
+    time = mod(t,24);
+    delta = 23.45*sind((360/365)*(284+day)); %calculation of declination angle
+    alpha = 90 - latitude + delta; %calculation of elevation angle
+    LSTM = 15 * deltaTutc; %calculation of local standard time meridian
+    B = (360/365)*(day-81);
+    EoT = 9.87*sind(2*B) - 7.53*cosd(B) - 1.5*sind(B); %Equation of Time - accounts for eccentricity in orbit
+    TC = 4*(longitude-LSTM) + EoT; %Time correction factor
+    LST = time + TC/60; %Calcuation of local solar time
+    HRA = 15*(LST-12); %calculation of hour angle
+    sunAzimuthAngle = acosd((sind(delta)*cosd(latitude) - cosd(delta)*sind(latitude)*cosd(HRA))/cosd(alpha)); %calculation of Azimuth Angle of Sun
+    solarR(1) = GHI*(cosd(alpha)*sind(tilt)*cosd(0-sunAzimuthAngle) + sind(alpha)*cosd(tilt)); %calculation of solar radiation incident on tilted surface facing North (W/m^2)
+    solarR(2) = GHI*(cosd(alpha)*sind(tilt)*cosd(180-sunAzimuthAngle) + sind(alpha)*cosd(tilt)); %calculation of solar radiation incident on tilted surface facing South (W/m^2)
 end
 
 %function to convert from deg Celcius to deg Fahrenheit
