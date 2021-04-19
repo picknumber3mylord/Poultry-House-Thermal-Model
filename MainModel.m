@@ -1,6 +1,6 @@
 % Main Model for NZE Poultry House
 % Nathan Shang, Roxy Wilcox, Fermin Banuelos-Gonzalez
-% Edited 4/5/2021
+% Edited 4/19/2021
 
 clc
 clear all
@@ -50,7 +50,7 @@ SZA2017 = table2array(inpData2017(3:end,14))';
 SZA2016 = table2array(inpData2016(3:end,14))';
 
 % extract day numbers
-day = table2array(inpData2019(3:end,3);
+day = table2array(inpData2019(3:end,3));
 
 % define constants necessary for thermal model
 rSideInsu = designData(3,1);  %R-value of wall insulation (m^2*K/W)
@@ -182,7 +182,7 @@ end
 %outputs: Energy gain in Watts
 function solarEnergy = solarE(SHGC, tilt, latitude, day, GHI, area)
     solarR = solarRad(tilt, latitude, day, GHI); %total solar radiation in W/m^2
-    solarEnergy = SGHC*solarR*area; %energy gain from solar radiation in W
+    solarEnergy = SHGC*solarR*area; %energy gain from solar radiation in W
 end
 
 %function for calculating solar radiation incident on surface
