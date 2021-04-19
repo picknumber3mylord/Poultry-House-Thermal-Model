@@ -120,13 +120,13 @@ tData = [0:length(tempData2019)-1];
 
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc);
+    energyCost2016(i) = wallE(uSide, aSide, Tset, Tout(1,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) + floorE(pFloor, fFloor, Tset, Tout(1,i)) + roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc);
                     
-    energyCost2017(i) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc);
+    energyCost2017(i) = wallE(uSide, aSide, Tset, Tout(2,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) + floorE(pFloor, fFloor, Tset, Tout(2,i)) + roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc);
                     
-    energyCost2018(i) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc);
+    energyCost2018(i) = wallE(uSide, aSide, Tset, Tout(3,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) + floorE(pFloor, fFloor, Tset, Tout(3,i)) + roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc);
                     
-    energyCost2019(i) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longtitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc);
+    energyCost2019(i) = wallE(uSide, aSide, Tset, Tout(4,i)) + ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) + floorE(pFloor, fFloor, Tset, Tout(4,i)) + roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc);
                     
 end
 
