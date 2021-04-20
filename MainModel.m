@@ -176,7 +176,7 @@ function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lig
 end
 
 %function for calculating solar radiation energy gain 
-%inputs: SHGC, tilt of surface, latitude, day of year, GHI, area of surface
+%inputs: SHGC, area of surface, tilt of surface, longitude, latitude, day of year, time, GHI, difference between local time and UTC time, zenith angle of sun
 %outputs: Energy gain in Watts
 function solarEnergy = solarE(SHGC, area, tilt, longitude, latitude, day, t, GHI, deltaTutc, sunZenithAngle)
     if (sunZenithAngle == 90)
@@ -195,6 +195,9 @@ function solarEnergy = solarE(SHGC, area, tilt, longitude, latitude, day, t, GHI
     solarEnergy = solarEnergyS + solarEnergyN; %energy gain from solar radiation in W
 end
 
+%function for calculating solar radiation incident on surface
+%inputs: tilt angle in degrees, longitude, latitude, day of year, time Matrix, GHI, difference between local time and UTC time, Azimuth angle of module, zenith angle of sun
+%outputs: Solar radiation incident on surface in W/m^2
 function solarRad = solarR(tilt, longitude, latitude, day, t, GHI, deltaTutc, surfaceAzimuthAngle, sunZenithAngle)
     time = (mod(t,24) + 0.5); %Get hourly times and add a half hour because NSRDB data collected on the half hour
     B = (day-1)*360/365; %Calculation of constant for future use
