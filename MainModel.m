@@ -65,7 +65,7 @@ CpAir = 1005;  % specific heat of air in (J/kg/K);
 rhoAir = 1.204;  % density of air in (kg/m^3); 
 
 pFloor = designData(5,5); % perimeter of flooring (m)
-fFloor = 0.72; %F value of floor from ASHRAE 90.1 (BTU/hr/ft/F)
+fFloor = 1.03; %Perimeter heat loss factor (W/m/K)
 
 long = designData(5,1);  %total poultry house length (m)
 wide = designData(5,2);  %total poultry house width (m)
@@ -104,9 +104,6 @@ rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
 ventRate = 12*numChicken/3600;  % ventilation rate (m^3/s)
 machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs/day
-
-fFloor = fFloor*1055.06*3.28084/3600; %Coverts F value of floor from BTU/hr/ft/F to W/m/F
-%1055.06 J = 1 BTU, 3.28084 ft = 1 m; 1 hr = 3600 sec
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
@@ -152,10 +149,7 @@ end
 %inputs: perimeter of floor (m), F value of floor (W/m/F), temperature inside (C), temperature outside (C)
 %outputs: energy loss in Watts
  function floorEnergy = floorE(pFloor, fFloor, Tset, Tout)
-    TsetF = tempToFahr(Tset); %converts Tset to deg Farhenheit
-    ToutF = tempToFahr(Tout); %converts Tout to deg Farhenheit
-    tempDiff = TsetF-ToutF; %calculates temperature difference
-    floorEnergy = pFloor*fFloor*(tempDiff); %energy loss through floor
+    floorEnergy = pFloor*fFloor*(Tset-Tout); %energy loss through floor
  end
 
  %function for finding energy loss through roof
@@ -202,13 +196,6 @@ function solarR = solarRad(tilt, longitude, latitude, day, t, GHI, deltaTutc)
     HRA = 15*(LST-12); %calculation of hour angle
     sunAzimuthAngle = acosd((sind(delta)*cosd(latitude) - cosd(delta)*sind(latitude)*cosd(HRA))/cosd(alpha)); %calculation of Azimuth Angle of Sun
     solarR = GHI*(cosd(alpha)*sind(tilt)*cosd(180-sunAzimuthAngle) + sind(alpha)*cosd(tilt)); %calculation of solar radiation incident on tilted surface facing South (W/m^2)
-end
-
-%function to convert from deg Celcius to deg Fahrenheit
-%inputs: temperature (C)
-%outputs: temperature (F)
-function tempF = tempToFahr(tempC)
-    tempF = tempC*9/5+32;
 end
 
 function monthlyUse(enrgCost)
