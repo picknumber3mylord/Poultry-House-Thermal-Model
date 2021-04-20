@@ -87,6 +87,7 @@ longitude = -121.74; %longitude of Davis, CA in decimal degrees
 latitude = 38.53; %latitude of Davis, CA in decimal degrees
 deltaTutc = -7; %Difference between PST and UTC
 GHI = [GHI2016; GHI2017; GHI2018; GHI2019];
+SZA = [SZA2016; SZA2017; SZA2018; SZA2019];
 SHGCvent = 0.13; %Solar Heat Gain Coefficient of Louver vents
 aVent = designData(5,7); %area of vents (m^2)
 
@@ -117,14 +118,15 @@ tData = [0:length(tempData2019)-1];
 
 for i = 2:length(tData)
     % do calcs
-    energyCost2016(i) = -wallE(uSide, aSide, Tset, Tout(1,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) - floorE(pFloor, fFloor, Tset, Tout(1,i)) - roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc);
+    energyCost2016(i) = -wallE(uSide, aSide, Tset, Tout(1,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) - floorE(pFloor, fFloor, Tset, Tout(1,i)) - roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc, SZA(1,i));
                     
-    energyCost2017(i) = -wallE(uSide, aSide, Tset, Tout(2,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) - floorE(pFloor, fFloor, Tset, Tout(2,i)) - roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) ;%+ solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc);
+    energyCost2017(i) = -wallE(uSide, aSide, Tset, Tout(2,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) - floorE(pFloor, fFloor, Tset, Tout(2,i)) - roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc, SZA(2,i));
                    
-    energyCost2018(i) = -wallE(uSide, aSide, Tset, Tout(3,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) - floorE(pFloor, fFloor, Tset, Tout(3,i)) - roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) ;%+ solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc);
+    energyCost2018(i) = -wallE(uSide, aSide, Tset, Tout(3,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) - floorE(pFloor, fFloor, Tset, Tout(3,i)) - roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc, SZA(3,i));
                     
-    energyCost2019(i) = -wallE(uSide, aSide, Tset, Tout(4,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) - floorE(pFloor, fFloor, Tset, Tout(4,i)) - roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) ;%+ solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc);
-             
+    energyCost2019(i) = -wallE(uSide, aSide, Tset, Tout(4,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) - floorE(pFloor, fFloor, Tset, Tout(4,i)) - roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc, SZA(4,i));
+          
+    s(i) = solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc, SZA(1,i));
 end
 
 monthlyUse([energyCost2016; energyCost2017; energyCost2018; energyCost2019]);
@@ -176,26 +178,33 @@ end
 %function for calculating solar radiation energy gain 
 %inputs: SHGC, tilt of surface, latitude, day of year, GHI, area of surface
 %outputs: Energy gain in Watts
-function solarEnergy = solarE(SHGC, area, tilt, longitude, latitude, day, t, GHI, deltaTutc)
-    solarR = solarRad(tilt, longitude, latitude, day, t, GHI, deltaTutc); %total solar radiation in W/m^2
-    solarEnergy = SHGC*solarR*area/2; %energy gain from solar radiation in W
+function solarEnergy = solarE(SHGC, area, tilt, longitude, latitude, day, t, GHI, deltaTutc, sunZenithAngle)
+    if (sunZenithAngle == 90)
+        sunZenithAngle = 91; %% sun zenith angle of 90 means the sun is setting and confuses the code. Make it 91 to avoid breaking it
+    end
+    solarRadS = solarR(tilt, longitude, latitude, day, t, GHI, deltaTutc, 0, sunZenithAngle); %total solar radiation coming from the South in W/m^2
+    solarRadN = solarR(tilt, longitude, latitude, day, t, GHI, deltaTutc, 180, sunZenithAngle); %total solar radiation coming from the North in W/m^2
+    if (solarRadS<0)
+        solarRadS = 0; %Because we cannot have a negative solar radiation, these if statements act as a check
+    end
+    if (solarRadN<0)
+       solarRadN = 0; 
+    end
+    solarEnergyS = SHGC*solarRadS*area/2; %energy gain from South solar radiation in W
+    solarEnergyN = SHGC*solarRadN*area/2; %energy gain from North solar radiation in W
+    solarEnergy = solarEnergyS + solarEnergyN; %energy gain from solar radiation in W
 end
 
-%function for calculating solar radiation incident on surface
-%inputs: tilt angle in degrees, longitude, latitude, day of year, time Matrix, GHI, difference between local time and UTC time
-%outputs: Solar radiation incident on surface in W/m^2
-function solarR = solarRad(tilt, longitude, latitude, day, t, GHI, deltaTutc)
-    time = mod(t,24);
-    delta = 23.45*sind((360/365)*(284+day)); %calculation of declination angle
-    alpha = 90 - latitude + delta; %calculation of elevation angle
-    LSTM = 15 * deltaTutc; %calculation of local standard time meridian
-    B = (360/365)*(day-81);
-    EoT = 9.87*sind(2*B) - 7.53*cosd(B) - 1.5*sind(B); %Equation of Time - accounts for eccentricity in orbit
-    TC = 4*(longitude-LSTM) + EoT; %Time correction factor
-    LST = time + TC/60; %Calcuation of local solar time
-    HRA = 15*(LST-12); %calculation of hour angle
-    sunAzimuthAngle = acosd((sind(delta)*cosd(latitude) - cosd(delta)*sind(latitude)*cosd(HRA))/cosd(alpha)); %calculation of Azimuth Angle of Sun
-    solarR = GHI*(cosd(alpha)*sind(tilt)*cosd(180-sunAzimuthAngle) + sind(alpha)*cosd(tilt)); %calculation of solar radiation incident on tilted surface facing South (W/m^2)
+function solarRad = solarR(tilt, longitude, latitude, day, t, GHI, deltaTutc, surfaceAzimuthAngle, sunZenithAngle)
+    time = (mod(t,24) + 0.5); %Get hourly times and add a half hour because NSRDB data collected on the half hour
+    B = (day-1)*360/365; %Calculation of constant for future use
+    Lst = deltaTutc*15; %Calculation of standard meridian for time zone
+    E = 229.2*(0.000075 + 0.001868*cosd(B) - 0.032077*sind(B) - 0.014615*cosd(2*B) - 0.04089*sind(2*B));
+    Tsol = time + 4*(Lst - longitude) + E; %Calculation of solar time
+    w = 15*(Tsol-12); %Calculation of hour angle
+    delta = (180/pi)*(0.006918 - 0.399912*cosd(B) + 0.070257*sind(B) - 0.006758*cosd(2*B) + 0.000907*sind(2*B) - 0.002697*cosd(3*B) + 0.00148*sind(3*B)); %Calculation of declination angle
+    theta = acosd(sind(delta)*sind(latitude)*cosd(tilt) - sind(delta)*cosd(latitude)*sind(tilt)*cosd(surfaceAzimuthAngle) + cosd(delta)*cosd(latitude)*cosd(tilt)*cosd(w) + cosd(delta)*sind(latitude)*sind(tilt)*cosd(surfaceAzimuthAngle)*cosd(w) + cosd(delta)*sind(tilt)*sind(surfaceAzimuthAngle)*sind(w)); %calculation of angle of incidence
+    solarRad = GHI*(cosd(theta)/cosd(sunZenithAngle));%calculation of amount of solar radiation incident on surface
 end
 
 function monthlyUse(enrgCost)
