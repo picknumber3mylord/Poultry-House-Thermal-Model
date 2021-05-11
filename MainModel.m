@@ -1,6 +1,6 @@
 % Main Model for NZE Poultry House
 % Nathan Shang, Roxy Wilcox, Fermin Banuelos-Gonzalez
-% Edited 4/19/2021
+% Edited 5/2/2021
 
 clc
 clear all
@@ -65,6 +65,7 @@ CpAir = 1005;  % specific heat of air in (J/kg/K);
 rhoAir = 1.204;  % density of air in (kg/m^3); 
 
 pFloor = designData(5,5); % perimeter of flooring (m)
+A_f = ; % Area of flooring (m^2)
 fFloor = 1.03; %Perimeter heat loss factor (W/m/K)
 
 long = designData(5,1);  %total poultry house length (m)
@@ -74,6 +75,10 @@ rRoofInsu = designData(3,2); %R-value of roof insulation (m^2*K/W)
 roofMetalCond = sideMetalCond; %thermal conductivity of metal roofing material (W/m/K)
 roofMetalThick = sideMetalThick; %thickness of metal roofing (m)
 aRoof = designData(5,6);%area of roof (m^2)
+
+h_is = 3.45; % heat transfer coefficient between air and surface (W/m^2/K)
+A_at = 4.5; % dimensionless ratio b/t internal surfaces area and floor area
+            % assumed value in accordance with ISO 17390
 
 sensiDay = 4.1; %Senisible heat output of birds during lit hours (W/kg)
 sensiNight = 3.2; %sensible heat output of birds during dark hours (W/kg)
@@ -92,45 +97,63 @@ SHGCvent = 0.13; %Solar Heat Gain Coefficient of Louver vents
 aVent = designData(5,7); %area of vents (m^2)
 
 %Energy Consumers%
-eggPackerE = 2.5; %Energy consumped by egg packer (kW*hr/day)
-eggBeltE = 237.44; %Energy consumped by egg belt (kW*hr/day)
-eggElevatorE = 3.6; %Energy consumped by egg elevator (kW*hr/day)
-eggWasherE = 175; %Energy consumped by egg washer (kW*hr/day)
-lightsE = 13.399; %Energy consumped by lighting (kW*hr/day)
-manureBeltE = 20.768; %Energy consumped by manure belt (kW*hr/day)
+eggPackerE = 2.5; %Energy consumed by egg packer (kW*hr/day)
+eggBeltE = 237.44; %Energy consumed by egg belt (kW*hr/day)
+eggElevatorE = 3.6; %Energy consumed by egg elevator (kW*hr/day)
+eggWasherE = 175; %Energy consumed by egg washer (kW*hr/day)
+lightsE = 13.399; %Energy consumed by lighting (kW*hr/day)
+manureBeltE = 20.768; %Energy consumed by manure belt (kW*hr/day)
+feedingBeltE = 54.83 %Energy consumed by feeding belt (kWhr/day)
 
 %below is basic calculations to do that are used in functions but remain
 %constant, no matter the time
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
 ventRate = 12*numChicken/3600;  % ventilation rate (m^3/s)
-machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs/day
+machinaryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE + feedingBeltE) * 1000; %Sums all machinary energy costs and converts them into W*hrs/day
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
 
-% looping through NSRDB data points
-energyCost2019 = [];
-energyCost2018 = [];
-energyCost2017 = [];
-energyCost2016 = [];
 tData = [0:length(tempData2019)-1];
 
-for i = 2:length(tData)
-    % do calcs
-    energyCost2016(i) = -wallE(uSide, aSide, Tset, Tout(1,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(1,i)) - floorE(pFloor, fFloor, Tset, Tout(1,i)) - roofE(uRoof, aRoof, Tset, Tout(1,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc, SZA(1,i));
-                    
-    energyCost2017(i) = -wallE(uSide, aSide, Tset, Tout(2,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(2,i)) - floorE(pFloor, fFloor, Tset, Tout(2,i)) - roofE(uRoof, aRoof, Tset, Tout(2,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(2,i), deltaTutc, SZA(2,i));
-                   
-    energyCost2018(i) = -wallE(uSide, aSide, Tset, Tout(3,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(3,i)) - floorE(pFloor, fFloor, Tset, Tout(3,i)) - roofE(uRoof, aRoof, Tset, Tout(3,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(3,i), deltaTutc, SZA(3,i));
-                    
-    energyCost2019(i) = -wallE(uSide, aSide, Tset, Tout(4,i)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(4,i)) - floorE(pFloor, fFloor, Tset, Tout(4,i)) - roofE(uRoof, aRoof, Tset, Tout(4,i)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(4,i), deltaTutc, SZA(4,i));
-          
-    s(i) = solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(i), tData(i), GHI(1,i), deltaTutc, SZA(1,i));
-end
-
+energyCost2019 = calcCost(tempData2019);
+energyCost2018 = calcCost(tempData2018);
+energyCost2017 = calcCost(tempData2017);
+energyCost2016 = calcCost(tempData2016);
 monthlyUse([energyCost2016; energyCost2017; energyCost2018; energyCost2019]);
 yearlyUse([energyCost2016; energyCost2017; energyCost2018; energyCost2019]);
+
+% plotting
+% plotting hourly data
+figure(1)
+plot(tData, energyCost2019, 'r', tData, energyCost2018, 'g', tData, energyCost2017, 'b', tData, energyCost2016, 'k')
+legend('2019', '2018', '2017', '2016')
+title('Hourly Energy Use from 2016-2019')
+xlabel('hours passed')
+ylabel('Energy Usage (kWh)')
+
+% function for calculating energy requirements
+% employs method described by ISO 13790
+% modified for poultry house by Costantino et al.
+% heat transfer coefficient represent with "H" (W/K)
+% T represents temperature in C
+% output: energy used to heat/ventilate the house in W
+function energyUse = calcCost(tempData)
+
+    energyCost = [];
+    mE = machineryE / 24; % converts machinery energy consumption to Whr/hr
+    
+    for i = 1:length(tempData)
+        heatNeed = ;%however we are going to check temperature
+        if heatNeed <= 0
+            energyCost(i) = mE + fanE + evapCoolE% + whatever else is needed;
+        else
+            heatCost = (1/0.92) * heatNeed;
+            energyCost(i) = heatCost + mE + fanE
+        end
+            
+end
 
 %function for finding heat loss through walls
 %inputs: overall heat transfer coeff of walls, area of wall, temperature inside, temperature outside
@@ -173,7 +196,7 @@ function chickEnergy = chickE(t, sensiDay, sensiNight, chickWeight, lightOn, lig
     else 
         chickEnergy = numChicken*sensiNight*chickWeight; %during dark hours, use sensible heat production for night
     end 
-end
+end   
 
 %function for calculating solar radiation energy gain 
 %inputs: SHGC, area of surface, tilt of surface, longitude, latitude, day of year, time, GHI, difference between local time and UTC time, zenith angle of sun
@@ -213,18 +236,34 @@ end
 
 function monthlyUse(enrgCost)
     enrgCost = enrgCost / 1000; % converted to kWh
-    fprintf('The average energy usage in January was %d kWh.\n', sum(enrgCost(1:end,1:(24*31)), 'all')/4)
-    fprintf('The average energy usage in February was %d kWh.\n', sum(enrgCost(1:end,(24*31+1):(24*59)), 'all')/4)
-    fprintf('The average energy usage in March was %d kWh.\n', sum(enrgCost(1:end,(24*59+1):(24*90)), 'all')/4)
-    fprintf('The average energy usage in April was %d kWh.\n', sum(enrgCost(1:end,(24*90+1):(24*120)), 'all')/4)
-    fprintf('The average energy usage in May was %d kWh.\n', sum(enrgCost(1:end,(24*120+1):(24*151)), 'all')/4)
-    fprintf('The average energy usage in June was %d kWh.\n', sum(enrgCost(1:end,(24*151+1):(24*181)), 'all')/4)
-    fprintf('The average energy usage in July was %d kWh.\n', sum(enrgCost(1:end,(24*181+1):(24*212)), 'all')/4)
-    fprintf('The average energy usage in August was %d kWh.\n', sum(enrgCost(1:end,(24*212+1):(24*243)), 'all')/4)
-    fprintf('The average energy usage in September was %d kWh.\n', sum(enrgCost(1:end,(24*243+1):(24*273)), 'all')/4)
-    fprintf('The average energy usage in October was %d kWh.\n', sum(enrgCost(1:end,(24*273+1):(24*304)), 'all')/4)
-    fprintf('The average energy usage in November was %d kWh.\n', sum(enrgCost(1:end,(24*304+1):(24*334)), 'all')/4)
-    fprintf('The average energy usage in December was %d kWh.\n', sum(enrgCost(1:end,(24*334+1):(24*365)), 'all')/4)
+    for i = 1:4
+        jan = sum(enrgCost(i:end,1:(24*31));
+        feb = sum(enrgCost(i:end,(24*31+1):(24*59));
+        mar = sum(enrgCost(i:end,(24*59+1):(24*90));
+        apr = sum(enrgCost(i:end,(24*90+1):(24*120));
+        may = sum(enrgCost(i:end,(24*120+1):(24*151));
+        jun = sum(enrgCost(i:end,(24*151+1):(24*181));
+        jul = sum(enrgCost(i:end,(24*181+1):(24*212));
+        aug = sum(enrgCost(i:end,(24*212+1):(24*243));
+        sep = sum(enrgCost(i:end,(24*243+1):(24*273));
+        oct = sum(enrgCost(i:end,(24*273+1):(24*304));
+        nov = sum(enrgCost(i:end,(24*304+1):(24*334));
+        dec = sum(enrgCost(i:end,(24*334+1):(24*365));
+        fprintf('The average energy usage in January was %d kWh.\n', jan, 'all')/4)
+        fprintf('The average energy usage in February was %d kWh.\n', feb, 'all')/4)
+        fprintf('The average energy usage in March was %d kWh.\n', mar, 'all')/4)
+        fprintf('The average energy usage in April was %d kWh.\n', apr, 'all')/4)
+        fprintf('The average energy usage in May was %d kWh.\n', may, 'all')/4)
+        fprintf('The average energy usage in June was %d kWh.\n', jun, 'all')/4)
+        fprintf('The average energy usage in July was %d kWh.\n', jul, 'all')/4)
+        fprintf('The average energy usage in August was %d kWh.\n', aug, 'all')/4)
+        fprintf('The average energy usage in September was %d kWh.\n', sep, 'all')/4)
+        fprintf('The average energy usage in October was %d kWh.\n', oct, 'all')/4)
+        fprintf('The average energy usage in November was %d kWh.\n', nov, 'all')/4)
+        fprintf('The average energy usage in December was %d kWh.\n', dec, 'all')/4)
+        figure(i+1)
+        bar([jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec])
+        title(i)
 end
     
 function yearlyUse(enrgCost)
