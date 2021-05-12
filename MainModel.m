@@ -175,19 +175,20 @@ for i = 1:4
     novH = sum(heat(i:end,(24*304+1):(24*334)), 'all');
     decH = sum(heat(i:end,(24*334+1):(24*365)), 'all');
     
-    y = [janF manureBeltE*31 lightsE*31 feedingBeltE*31;
+    y = [sepF manureBeltE*30 lightsE*30 feedingBeltE*30;
+         octF manureBeltE*31 lightsE*31 feedingBeltE*31;
+         novF manureBeltE*30 lightsE*30 feedingBeltE*30;
+         decF manureBeltE*31 lightsE*31 feedingBeltE*31;
+         janF manureBeltE*31 lightsE*31 feedingBeltE*31;
          febF manureBeltE*28 lightsE*28 feedingBeltE*28;
          marF manureBeltE*31 lightsE*31 feedingBeltE*31;
          aprF manureBeltE*30 lightsE*30 feedingBeltE*30;
          mayF manureBeltE*31 lightsE*31 feedingBeltE*31;
          junF manureBeltE*30 lightsE*30 feedingBeltE*30;
          julF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         augF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         sepF manureBeltE*30 lightsE*30 feedingBeltE*30;
-         octF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         novF manureBeltE*30 lightsE*30 feedingBeltE*30;
-         decF manureBeltE*31 lightsE*31 feedingBeltE*31];
-     figure(i)
+         augF manureBeltE*31 lightsE*31 feedingBeltE*31];
+         
+     figure(2*i-1)
      bar(y, 'stacked')
      if i == 1
          title('Energy Usage for 2016')
@@ -200,8 +201,23 @@ for i = 1:4
      end
      xlabel('Month')
      ylabel('Energy Usage (kWh)')
-     set(gca,'xticklabel',{'Jan','Feb','Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Nov', 'Dec'})
+     set(gca,'xticklabel',{'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'})
      legend('Fans', 'Manure Belt', 'Lighting', 'Feeding Belt', 'Location', 'north')
+     
+     figure(2*i)
+     bar([sepH octH novH decH janH febH marH aprH mayH junH julH augH])
+     if i == 1
+         title('Heating Energy for 2016')
+     elseif i == 2
+         title('Heating Energy for 2017')
+     elseif i == 3
+         title('Heating Energy for 2018')
+     else
+         title('Heating Energy for 2019')
+     end
+     xlabel('Month')
+     ylabel('Energy Usage (kWh)')
+     set(gca,'xticklabel',{'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'})
 end
 
 % monthlyUse(energyCost);
