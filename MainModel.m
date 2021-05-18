@@ -1,6 +1,6 @@
 % Main Model for NZE Poultry House
 % Nathan Shang, Roxy Wilcox, Fermin Banuelos-Gonzalez
-% Edited 4/19/2021
+% Edited 5/18/2021
 
 clc
 clear all
@@ -60,7 +60,7 @@ day = table2array(inpData2019(3:end,3));
 
 %HVAC Constants
 heatEff = 0.92; %Efficiency of heaters
-evapPadEff = 90; %Efficiency of evaporative cooling pads (%)
+evapPadEff = .9; %Efficiency of evaporative cooling pads (%)
 
 % define constants necessary for thermal model
 rSideInsu = designData(3,1);  %R-value of wall insulation (m^2*K/W)
@@ -175,20 +175,20 @@ for i = 1:4
     novH = sum(heat(i:end,(24*304+1):(24*334)), 'all');
     decH = sum(heat(i:end,(24*334+1):(24*365)), 'all');
     
-    y = [sepF manureBeltE*30 lightsE*30 feedingBeltE*30;
-         octF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         novF manureBeltE*30 lightsE*30 feedingBeltE*30;
-         decF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         janF manureBeltE*31 lightsE*31 feedingBeltE*31;
+    y = [janF manureBeltE*31 lightsE*31 feedingBeltE*31;
          febF manureBeltE*28 lightsE*28 feedingBeltE*28;
          marF manureBeltE*31 lightsE*31 feedingBeltE*31;
          aprF manureBeltE*30 lightsE*30 feedingBeltE*30;
          mayF manureBeltE*31 lightsE*31 feedingBeltE*31;
          junF manureBeltE*30 lightsE*30 feedingBeltE*30;
          julF manureBeltE*31 lightsE*31 feedingBeltE*31;
-         augF manureBeltE*31 lightsE*31 feedingBeltE*31];
+         augF manureBeltE*31 lightsE*31 feedingBeltE*31;
+         sepF manureBeltE*30 lightsE*30 feedingBeltE*30;
+         octF manureBeltE*31 lightsE*31 feedingBeltE*31;
+         novF manureBeltE*30 lightsE*30 feedingBeltE*30;
+         decF manureBeltE*31 lightsE*31 feedingBeltE*31];
          
-     figure(2*i-1)
+     figure(i)
      bar(y, 'stacked')
      if i == 1
          title('Energy Usage for 2016')
@@ -220,18 +220,59 @@ for i = 1:4
      set(gca,'xticklabel',{'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'})
 end
 
-% monthlyUse(energyCost);
+monthlyUse(energyCost);
 % yearlyUse(energyCost);
 
 % plotting
-% plotting hourly data
-% figure(1)
-% plot(tData, energyCost2019, 'r', tData, energyCost2018, 'g', tData, energyCost2017, 'b', tData, energyCost2016, 'k')
-% legend('2019', '2018', '2017', '2016')
-% title('Hourly Energy Use from 2016-2019')
-% xlabel('hours passed')
-% ylabel('Energy Usage (kWh)')
+% plotting input data
+figure(13)
+plot(tData, tempData2016)
+title('Hourly Temperature Values 2016')
+xlabel('Hours passed')
+ylabel('Temperature (C)')
 
+figure(14)
+plot(tData, tempData2017, 'r')
+title('Hourly Temperature Values 2017')
+xlabel('Hours passed')
+ylabel('Temperature (C)')
+
+figure(15)
+plot(tData, tempData2018, 'b')
+title('Hourly Temperature Values 2018')
+xlabel('Hours passed')
+ylabel('Temperature (C)')
+
+figure(16)
+plot(tData, tempData2019, 'k')
+title('Hourly Temperature Values 2019')
+xlabel('Hours passed')
+ylabel('Temperature (C)')
+
+figure(17)
+plot(tData, GHI2016, 'g')
+title('GHI Values 2016')
+xlabel('Hours passed')
+ylabel('GHI')
+
+
+figure(18)
+plot(tData, GHI2017, 'r')
+title('GHI Values 2017')
+xlabel('Hours passed')
+ylabel('GHI')
+
+figure(19)
+plot(tData, GHI2018, 'b')
+title('GHI Values 2018')
+xlabel('Hours passed')
+ylabel('GHI')
+
+figure(20)
+plot(tData, GHI2019, 'k')
+title('GHI Values 2019')
+xlabel('Hours passed')
+ylabel('GHI')
 
 %function for finding electricity requirements of cooling system
 %inputs: supplemental energy required, relative humidity, Temp outside,
@@ -330,18 +371,18 @@ end
 function monthlyUse(enrgCost)
     enrgCost = enrgCost / 1000; % converted to kWh
     for i = 1:4
-        jan = sum(enrgCost(i:end,1:(24*31)));
-        feb = sum(enrgCost(i:end,(24*31+1):(24*59)));
-        mar = sum(enrgCost(i:end,(24*59+1):(24*90)));
-        apr = sum(enrgCost(i:end,(24*90+1):(24*120)));
-        may = sum(enrgCost(i:end,(24*120+1):(24*151)));
-        jun = sum(enrgCost(i:end,(24*151+1):(24*181)));
-        jul = sum(enrgCost(i:end,(24*181+1):(24*212)));
-        aug = sum(enrgCost(i:end,(24*212+1):(24*243)));
-        sep = sum(enrgCost(i:end,(24*243+1):(24*273)));
-        oct = sum(enrgCost(i:end,(24*273+1):(24*304)));
-        nov = sum(enrgCost(i:end,(24*304+1):(24*334)));
-        dec = sum(enrgCost(i:end,(24*334+1):(24*365)));
+        jan = sum(enrgCost(i:end,1:(24*31)), 'all');
+        feb = sum(enrgCost(i:end,(24*31+1):(24*59)), 'all');
+        mar = sum(enrgCost(i:end,(24*59+1):(24*90)), 'all');
+        apr = sum(enrgCost(i:end,(24*90+1):(24*120)), 'all');
+        may = sum(enrgCost(i:end,(24*120+1):(24*151)), 'all');
+        jun = sum(enrgCost(i:end,(24*151+1):(24*181)), 'all');
+        jul = sum(enrgCost(i:end,(24*181+1):(24*212)), 'all');
+        aug = sum(enrgCost(i:end,(24*212+1):(24*243)), 'all');
+        sep = sum(enrgCost(i:end,(24*243+1):(24*273)), 'all');
+        oct = sum(enrgCost(i:end,(24*273+1):(24*304)), 'all');
+        nov = sum(enrgCost(i:end,(24*304+1):(24*334)), 'all');
+        dec = sum(enrgCost(i:end,(24*334+1):(24*365)), 'all');
 %         fprintf('The average energy usage in January was %d kWh.\n', jan, 'all')/4)
 %         fprintf('The average energy usage in February was %d kWh.\n', feb, 'all')/4)
 %         fprintf('The average energy usage in March was %d kWh.\n', mar, 'all')/4)
@@ -354,9 +395,20 @@ function monthlyUse(enrgCost)
 %         fprintf('The average energy usage in October was %d kWh.\n', oct, 'all')/4)
 %         fprintf('The average energy usage in November was %d kWh.\n', nov, 'all')/4)
 %         fprintf('The average energy usage in December was %d kWh.\n', dec, 'all')/4)
-        figure(i+5)
+        figure(i+8)
         bar([jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec])
-        title(i)
+        if i == 1
+            title('Monthly Energy Usage for 2016')
+        elseif i == 2
+            title('Monthly Energy Usage for 2017')
+        elseif i == 3
+            title('Monthly Energy Usage for 2018')
+        else
+            title('Monthly Energy Usage for 2019')
+        end
+        xlabel('Month')
+        ylabel('Energy Usage (kWh)')
+        set(gca,'xticklabel',{'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
     end
 end
     
