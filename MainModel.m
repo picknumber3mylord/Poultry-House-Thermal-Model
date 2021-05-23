@@ -1,10 +1,9 @@
 % Main Model for NZE Poultry House
 % Nathan Shang, Roxy Wilcox, Fermin Banuelos-Gonzalez
-% Edited 5/18/2021
+% Edited 5/22/2021
 
 clc
 clear all
-
 % Thermal model for calculating energy consumption of a model poultry house
 % Uses metric units
 % Outputs: Thermal energy needed in J
@@ -15,48 +14,29 @@ clear all
     % poultry house geometry    
 
 % input reading
-inpData2019 = readtable('Thermal_Model_Input_Data_2019.csv','PreserveVariableNames',true);
-inpData2018 = readtable('Thermal_Model_Input_Data_2018.csv','PreserveVariableNames',true);
-inpData2017 = readtable('Thermal_Model_Input_Data_2017.csv','PreserveVariableNames',true);
-inpData2016 = readtable('Thermal_Model_Input_Data_2016.csv','PreserveVariableNames',true);
+inpData = readtable('Thermal_Model_Input_Data.csv','PreserveVariableNames',true);
+
 designData = xlsread('Mk1.xlsx');
 % organize input data into matrix
 
 % tData = inpData(%indexing)  % vector of time values % might be unneeded
-tempData2019 = table2array(inpData2019(3:end,21))';   % vectors of hourly temperature data from NSRDB
-tempData2018 = table2array(inpData2018(3:end,21))';
-tempData2017 = table2array(inpData2017(3:end,21))';
-tempData2016 = table2array(inpData2016(3:end,21))';
-
+tempData = table2array(inpData(3:end,21))';   % vectors of hourly temperature data from NSRDB
+Tout = tempData;
 %Relative Humiluty data from NSRDB
-RHdata2016 = table2array(inpData2016(3:end,20))';
-RHdata2017 = table2array(inpData2017(3:end,20))';
-RHdata2018 = table2array(inpData2018(3:end,20))';
-RHdata2019 = table2array(inpData2019(3:end,20))';
+RH = table2array(inpData(3:end,20))';
 
 % solar radiation data from NSRDB
-DHI2019 = table2array(inpData2019(3:end,6))';    
-DHI2018 = table2array(inpData2018(3:end,6))';
-DHI2017 = table2array(inpData2017(3:end,6))';
-DHI2016 = table2array(inpData2016(3:end,6))';
+DHI = table2array(inpData(3:end,6))';    
 
-DNI2019 = table2array(inpData2019(3:end,7))';
-DNI2018 = table2array(inpData2018(3:end,7))';
-DNI2017 = table2array(inpData2017(3:end,7))';
-DNI2016 = table2array(inpData2016(3:end,7))';
+DNI = table2array(inpData(3:end,7))';
 
-GHI2019 = table2array(inpData2019(3:end,8))';
-GHI2018 = table2array(inpData2018(3:end,8))';
-GHI2017 = table2array(inpData2017(3:end,8))';
-GHI2016 = table2array(inpData2016(3:end,8))';
+GHI = table2array(inpData(3:end,8))';
 
-SZA2019 = table2array(inpData2019(3:end,14))';
-SZA2018 = table2array(inpData2018(3:end,14))';
-SZA2017 = table2array(inpData2017(3:end,14))';
-SZA2016 = table2array(inpData2016(3:end,14))';
+SZA = table2array(inpData(3:end,14))';
 
 % extract day numbers
-day = table2array(inpData2019(3:end,3));
+day = table2array(inpData(3:end,3));
+month = table2array(inpData(3:end, 2));
 
 %HVAC Constants
 heatEff = 0.92; %Efficiency of heaters
@@ -68,8 +48,8 @@ sideMetalCond = designData(1,1);  %thermal conductivity of metal siding material
 sideMetalThick = designData(5,3);  %thickness of metal siding (m)
 aSide =  designData(5,4);  %area of wall minus area of windows (m^2)
 
-Tset = 21; %inside temperature (C)
-Tout = [tempData2016; tempData2017; tempData2018; tempData2019];  %outside temperature (C)
+TsetSummer = 28; %inside temperature (C)
+TsetWinter = 22;
 
 CpAir = 1005;  % specific heat of air in (J/kg/K);
 rhoAir = 1.204;  % density of air in (kg/m^3); 
@@ -96,8 +76,6 @@ ventTilt = 90; %tilt of vents with respect to horizontal in degrees
 longitude = 121.74; %longitude of Davis, CA in decimal degrees West
 latitude = 38.53; %latitude of Davis, CA in decimal degrees
 deltaTutc = 8; %Difference between PST and UTC
-GHI = [GHI2016; GHI2017; GHI2018; GHI2019];
-SZA = [SZA2016; SZA2017; SZA2018; SZA2019];
 SHGCvent = 0.13; %Solar Heat Gain Coefficient of Louver vents
 aVent = designData(5,7); %area of vents (m^2)
 ventEff = 25.5; %ventilation efficiency (m^3/hr/W)
@@ -106,7 +84,6 @@ ventEff = 25.5; %ventilation efficiency (m^3/hr/W)
 eggPackerE = 2.5; %Energy consumed by egg packer (kW*hr/day)
 eggBeltE = 237.44; %Energy consumed by egg belt (kW*hr/day)
 eggElevatorE = 3.6; %Energy consumed by egg elevator (kW*hr/day)
-eggWasherE = 175; %Energy consumed by egg washer (kW*hr/day)
 lightsE = 13.399; %Energy consumed by lighting (kW*hr/day)
 manureBeltE = 20.768; %Energy consumed by manure belt (kW*hr/day)
 feedingBeltE = 54.83; %Energy consumed by feeding belt (kWhr/day)
@@ -115,40 +92,48 @@ feedingBeltE = 54.83; %Energy consumed by feeding belt (kWhr/day)
 %constant, no matter the time
 rSideMetal = sideMetalThick/sideMetalCond;
 uSide = 1/(rSideInsu+rSideMetal);
-ventRate = 12*numChicken/3600;  % ventilation rate (m^3/s)
-machineryE = (eggPackerE + eggBeltE + eggElevatorE + eggWasherE + lightsE + manureBeltE + feedingBeltE) * 1000; %Sums all machinemry energy costs and converts them into W*hrs/day
+ventRatePerHen = 0.6;  % ventilation rate (m^3/hen/hr)
+ventRate = ventRatePerHen*numChicken/3600; %Ventilation rate (m^3/s)
+machineryE = (eggPackerE + eggBeltE + eggElevatorE + lightsE + manureBeltE + feedingBeltE); %Sums all machinemry energy costs (kWh/day)
 
 rRoofMetal = roofMetalThick/roofMetalCond; %Calculates R-value of roof metal (m^2*K/W)
 uRoof = 1/(rRoofMetal + rRoofInsu); %Overall heat transfer coefficient of room (W/m^2/K)
 
 % calculating energy usage
-tData = [1:length(tempData2019)];
-fans = zeros(4,length(tempData2019));
-heat = zeros(4,length(tempData2019));
-energyCost = zeros(4,length(tempData2019));
+tData = [1:length(tempData)];
+fans = zeros(1,length(tempData));
+heat = zeros(1,length(tempData));
+heatNeed = zeros(1,length(tempData));
+energyCost = zeros(1,length(tempData));
 mE = machineryE / 24; % converts machinery energy consumption to Whr/hr
-RH = [RHdata2016; RHdata2017; RHdata2018; RHdata2019];
 
-for i = 1:4
-    for j = 1:length(tempData2019)
-        heatNeed = -wallE(uSide, aSide, Tset, Tout(i,j)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(i,j)) - floorE(pFloor, fFloor, Tset, Tout(i,j)) - roofE(uRoof, aRoof, Tset, Tout(i,j)) + chickE(tData(i), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(j), tData(j), GHI(i,j), deltaTutc, SZA(i,j));
-        if heatNeed < 0 % net heat lost to external environment
+for i = 1:1
+    for j = 1:length(tempData)
+        
+        if (month(j) >= 4) && (month(j) <= 9)
+            Tset = TsetSummer;
+        else 
+            Tset = TsetWinter;
+        end
+
+        heatNeed(j) = -wallE(uSide, aSide, Tset, Tout(j)) - ventE(CpAir, rhoAir, ventRate, Tset, Tout(j)) - floorE(pFloor, fFloor, Tset, Tout(j)) - roofE(uRoof, aRoof, Tset, Tout(j)) + chickE(tData(j), sensiDay, sensiNight, chickWeight, lightOn, lightOff, numChicken) + solarE(SHGCvent, aVent, ventTilt, longitude, latitude, day(j), tData(j), GHI(j), deltaTutc, SZA(j));
+        if heatNeed(j) < 0 % net heat lost to external environment
         % need to calculate heating
         % base ventilation rate used
-            energyCost(i,j) = (mE + ventRate/ventEff*3600 - heatNeed/heatEff) / 1000;
-            fans(i,j) = (ventRate/ventEff*3600) / 1000;
-            heat(i,j) = -(heatNeed/heatEff) / 1000;
+            energyCost(j) = mE + (ventRate/ventEff*3600 - heatNeed(j)/heatEff) / 1000;
+            fans(j) = (ventRate/ventEff*3600) / 1000;
+            heat(j) = -(heatNeed(j)/heatEff) / 1000;
         else % net heat gain from external environment
         % cooling is needed from ventilation and evap cooling
-            energyCost(i,j) = mE/1000 + evapCool(heatNeed, RH(i,j), Tout(i,j), evapPadEff, CpAir, rhoAir, ventRate, Tset, ventEff);
-            fans(i,j) = evapCool(heatNeed, RH(i,j), Tout(i,j), evapPadEff, CpAir, rhoAir, ventRate, Tset, ventEff);
-            heat(i,j) = 0;
+            energyCost(j) = mE + evapCool(heatNeed(j), RH(j), Tout(j), evapPadEff, CpAir, rhoAir, ventRate, Tset, ventEff);
+            fans(j) = evapCool(heatNeed(j), RH(j), Tout(j), evapPadEff, CpAir, rhoAir, ventRate, Tset, ventEff);
+            heat(j) = 0;
         end
     end
 end
 
 % ISU graphing
-for i = 1:4
+for i = 1:1
     janF = sum(fans(i:end,1:(24*31)), 'all');
     febF = sum(fans(i:end,(24*31+1):(24*59)), 'all');
     marF = sum(fans(i:end,(24*59+1):(24*90)), 'all');
@@ -190,15 +175,7 @@ for i = 1:4
          
      figure(i)
      bar(y, 'stacked')
-     if i == 1
-         title('Energy Usage for 2016')
-     elseif i == 2
-         title('Energy Usage for 2017')
-     elseif i == 3
-         title('Energy Usage for 2018')
-     else
-         title('Energy Usage for 2019')
-     end
+     title('Energy Usage for 2019')
      xlabel('Month')
      ylabel('Energy Usage (kWh)')
      set(gca,'xticklabel',{'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'})
@@ -206,15 +183,8 @@ for i = 1:4
      
      figure(2*i)
      bar([sepH octH novH decH janH febH marH aprH mayH junH julH augH])
-     if i == 1
-         title('Heating Energy for 2016')
-     elseif i == 2
-         title('Heating Energy for 2017')
-     elseif i == 3
-         title('Heating Energy for 2018')
-     else
-         title('Heating Energy for 2019')
-     end
+     title('Heating Energy for 2019')
+
      xlabel('Month')
      ylabel('Energy Usage (kWh)')
      set(gca,'xticklabel',{'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'})
@@ -225,51 +195,16 @@ monthlyUse(energyCost);
 
 % plotting
 % plotting input data
-figure(13)
-plot(tData, tempData2016)
-title('Hourly Temperature Values 2016')
-xlabel('Hours passed')
-ylabel('Temperature (C)')
 
-figure(14)
-plot(tData, tempData2017, 'r')
-title('Hourly Temperature Values 2017')
-xlabel('Hours passed')
-ylabel('Temperature (C)')
-
-figure(15)
-plot(tData, tempData2018, 'b')
-title('Hourly Temperature Values 2018')
-xlabel('Hours passed')
-ylabel('Temperature (C)')
-
-figure(16)
-plot(tData, tempData2019, 'k')
+figure(3)
+plot(tData, tempData, 'k')
 title('Hourly Temperature Values 2019')
 xlabel('Hours passed')
 ylabel('Temperature (C)')
 
-figure(17)
-plot(tData, GHI2016, 'g')
-title('GHI Values 2016')
-xlabel('Hours passed')
-ylabel('GHI')
 
-
-figure(18)
-plot(tData, GHI2017, 'r')
-title('GHI Values 2017')
-xlabel('Hours passed')
-ylabel('GHI')
-
-figure(19)
-plot(tData, GHI2018, 'b')
-title('GHI Values 2018')
-xlabel('Hours passed')
-ylabel('GHI')
-
-figure(20)
-plot(tData, GHI2019, 'k')
+figure(4)
+plot(tData, GHI, 'k')
 title('GHI Values 2019')
 xlabel('Hours passed')
 ylabel('GHI')
@@ -284,7 +219,7 @@ function evapCoolE = evapCool(qSup, RH, TdryIn, evapPadEff, CpAir, rhoAir, ventR
     TwetIn = TdryIn*atan(0.151977*((RH+8.313659)^0.5)) + atan(TdryIn+RH) - atan(RH - 1.676331) + 0.00391838*(RH^(3/2))*atan(0.023101*RH) - 4.686035;
     %^Calculation of wet bulb temperature
     TdryOut = TdryIn - evapPadEff*(TdryIn - TwetIn); %calculation of temp of air leaving evap cooling pads and going into the house
-    qSupNoVent = qSup - ventE(CpAir, rhoAir, ventRate, Tset, TdryIn); %removal of ventilation from supplemental heating required because it is about to be recalculated (W)
+    qSupNoVent = qSup + ventE(CpAir, rhoAir, ventRate, Tset, TdryIn); %removal of ventilation from supplemental heating required because it is about to be recalculated (W)
     VentRateReq = qSupNoVent/(CpAir*rhoAir*(Tset - TdryOut)); %Ventilation rate required given supplemental heat requiremets and temp leaving cooling pads (W)
     evapCoolE = VentRateReq/ventEff * 3600/1000; %energy requirements of ventilation system (kW)   
 end
@@ -300,8 +235,8 @@ end
 % inputs: specific heat of air, density of air
           % venitlation rate, temperature inside/outside
 % output: energy loss in Watts
-function ventEnergy = ventE(Cp, rhoAir, ventRate, Tset, Tout)
-    ventEnergy = Cp*rhoAir*ventRate*(Tset - Tout); % energy loss to ventilation
+function ventEnergy = ventE(CpAir, rhoAir, ventRate, Tset, Tout)
+    ventEnergy = CpAir*rhoAir*ventRate*(Tset - Tout); % energy loss to ventilation
 end
 
 %function for finding energy loss through floor
@@ -370,7 +305,7 @@ end
 
 function monthlyUse(enrgCost)
     enrgCost = enrgCost / 1000; % converted to kWh
-    for i = 1:4
+    for i = 1:1
         jan = sum(enrgCost(i:end,1:(24*31)), 'all');
         feb = sum(enrgCost(i:end,(24*31+1):(24*59)), 'all');
         mar = sum(enrgCost(i:end,(24*59+1):(24*90)), 'all');
@@ -397,15 +332,7 @@ function monthlyUse(enrgCost)
 %         fprintf('The average energy usage in December was %d kWh.\n', dec, 'all')/4)
         figure(i+8)
         bar([jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec])
-        if i == 1
-            title('Monthly Energy Usage for 2016')
-        elseif i == 2
-            title('Monthly Energy Usage for 2017')
-        elseif i == 3
-            title('Monthly Energy Usage for 2018')
-        else
-            title('Monthly Energy Usage for 2019')
-        end
+        title('Monthly Energy Usage for 2019')
         xlabel('Month')
         ylabel('Energy Usage (kWh)')
         set(gca,'xticklabel',{'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'})
