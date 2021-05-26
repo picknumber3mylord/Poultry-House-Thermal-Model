@@ -195,19 +195,46 @@ monthlyUse(energyCost);
 
 % plotting
 % plotting input data
+dailyTemp = zeros(4,365);
+dailyEnergy = zeros(4,365);
+for i = 1:365
+    dailyTemp(1,i) = sum(tempData2016((i-1)*24+1:i*24), 'all')/24;
+    dailyTemp(2,i) = sum(tempData2017((i-1)*24+1:i*24), 'all')/24;
+    dailyTemp(3,i) = sum(tempData2018((i-1)*24+1:i*24), 'all')/24;
+    dailyTemp(4,i) = sum(tempData2019((i-1)*24+1:i*24), 'all')/24;
+    dailyEnergy(1,i) = sum(energyCost(1,(i-1)*24+1:i*24), 'all')/24;
+    dailyEnergy(2,i) = sum(energyCost(2,(i-1)*24+1:i*24), 'all')/24;
+    dailyEnergy(3,i) = sum(energyCost(3,(i-1)*24+1:i*24), 'all')/24;
+    dailyEnergy(4,i) = sum(energyCost(4,(i-1)*24+1:i*24), 'all')/24;
+end
 
-figure(3)
-plot(tData, tempData, 'k')
-title('Hourly Temperature Values 2019')
-xlabel('Hours passed')
+x = 1:365;
+
+figure(13)
+plot(x, dailyTemp(1,:), 'g')
+title('Average Daily Temperature 2016')
+xlabel('Day')
 ylabel('Temperature (C)')
 
+figure(14)
+plot(x, dailyTemp(2,:), 'r')
+title('Average Daily Temperature 2017')
+xlabel('Day')
+ylabel('Temperature (C)')
 
-figure(4)
-plot(tData, GHI, 'k')
-title('GHI Values 2019')
-xlabel('Hours passed')
-ylabel('GHI')
+figure(15)
+plot(x, dailyTemp(3,:), 'b')
+title('Average Daily Temperature 2018')
+xlabel('Day')
+ylabel('Temperature (C)')
+
+figure(16)
+plot(x, dailyTemp(4,:), 'k')
+title('Average Daily Temperature 2019')
+xlabel('Day')
+ylabel('Temperature (C)')
+
+dailyTempDown = dailyTemp';
 
 %function for finding electricity requirements of cooling system
 %inputs: supplemental energy required, relative humidity, Temp outside,
